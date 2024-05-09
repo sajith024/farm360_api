@@ -18,13 +18,14 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
 )
 
-from .models import Farm360User, Farm360UserProfile, Role, Country, Language
+from .models import Farm360User, Farm360UserProfile, Role, Country, Language, PhoneCode
 from .serializers import (
     RegistrationUserSerializer,
     LoginUserSerializer,
     RoleSerializer,
     CountrySerializer,
     LanguageSerializer,
+    PhoneCodeSerializer,
     UserProfileSerializer,
     UserProfileListSerializer,
 )
@@ -43,12 +44,13 @@ class RegistrationUserView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
-
-            token = RefreshToken.for_user(user=serializer.instance)
+            user = serializer.instance
+            token = RefreshToken.for_user(user=user)
             data = {
                 "data": {
-                    "id": serializer.instance.id,
-                    "first_name": serializer.instance.first_name,
+                    "id": user.profile.id,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
                     "token": {
                         "refresh": str(token),
                         "access": str(token.access_token),
@@ -79,8 +81,9 @@ class LoginUserView(CreateAPIView):
                 data = {
                     "message": "Login successful",
                     "data": {
-                        "id": user.id,
+                        "id": user.profile.id,
                         "first_name": user.first_name,
+                        "last_name": user.last_name,
                         "token": {
                             "refresh": str(token),
                             "access": str(token.access_token),
@@ -123,7 +126,14 @@ class LanguageView(ListAPIView):
 
 
 @extend_schema_view()
-class UserViewSet(ModelViewSet):
+class PhoneCodeView(ListAPIView):
+    queryset = PhoneCode.objects.all()
+    serializer_class = PhoneCodeSerializer
+    permission_classes = [IsAuthenticated]
+
+
+@extend_schema_view()
+class UserProfileViewSet(ModelViewSet):
     queryset = Farm360UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]

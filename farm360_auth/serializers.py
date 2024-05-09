@@ -1,7 +1,14 @@
 from rest_framework.serializers import ModelSerializer, Serializer
-from rest_framework.serializers import CharField, PrimaryKeyRelatedField
+from rest_framework.serializers import CharField, ImageField
 
-from farm360_auth.models import Farm360User, Farm360UserProfile, Role, Country, Language
+from farm360_auth.models import (
+    Farm360User,
+    Farm360UserProfile,
+    Role,
+    Country,
+    Language,
+    PhoneCode,
+)
 
 
 class RoleSerializer(ModelSerializer):
@@ -20,6 +27,17 @@ class LanguageSerializer(ModelSerializer):
     class Meta:
         model = Language
         fields = "__all__"
+
+
+class PhoneCodeSerializer(ModelSerializer):
+    flag = ImageField(source="country.flag")
+
+    class Meta:
+        model = PhoneCode
+        fields = (
+            "flag",
+            "code",
+        )
 
 
 class RegistrationUserSerializer(ModelSerializer):
@@ -53,18 +71,21 @@ class UserProfileListSerializer(ModelSerializer):
     role = CharField(source="role.name")
     language = CharField(source="language.name")
     country = CharField(source="country.name")
-    
+
     class Meta:
         model = Farm360UserProfile
         fields = (
+            "id",
             "email",
             "first_name",
             "last_name",
+            "image",
             "phone_number",
             "role",
             "language",
             "country",
         )
+
 
 class UserProfileSerializer(ModelSerializer):
     first_name = CharField(source="user.first_name")
@@ -79,6 +100,7 @@ class UserProfileSerializer(ModelSerializer):
             "first_name",
             "last_name",
             "password",
+            "image",
             "phone_number",
             "role",
             "language",
@@ -110,6 +132,7 @@ class UserProfileSerializer(ModelSerializer):
         instance.role = validated_data.get("role", instance.role)
         instance.language = validated_data.get("language", instance.language)
         instance.country = validated_data.get("country", instance.country)
+        instance.image = validated_data.get("image", instance.image)
 
         instance.save()
 

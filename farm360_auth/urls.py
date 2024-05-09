@@ -8,13 +8,14 @@ from .views import (
     LogoutUserView,
     RolesViewSet,
     CountryView,
+    PhoneCodeView,
     LanguageView,
-    UserViewSet,
+    UserProfileViewSet,
 )
 
 router = DefaultRouter()
 router.register("roles", RolesViewSet, basename="role")
-router.register("users", UserViewSet, basename="users")
+router.register("users", UserProfileViewSet, basename="users")
 
 urlpatterns = [
     path("signup/", RegistrationUserView.as_view(), name="api_signup"),
@@ -22,6 +23,7 @@ urlpatterns = [
     path("logout/", LogoutUserView.as_view(), name="api_logout"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("countries/", CountryView.as_view(), name="countries"),
+    path("phonecodes/", PhoneCodeView.as_view(), name="phone_codes"),
     path("languages/", LanguageView.as_view(), name="languages"),
     path("", include(router.urls)),
 ]
