@@ -35,6 +35,7 @@ class PhoneCodeSerializer(ModelSerializer):
     class Meta:
         model = PhoneCode
         fields = (
+            "id",
             "flag",
             "code",
         )
@@ -96,22 +97,27 @@ class UserProfileSerializer(ModelSerializer):
     class Meta:
         model = Farm360UserProfile
         fields = (
+            "id",
             "email",
             "first_name",
             "last_name",
             "password",
             "image",
+            "phone_code",
             "phone_number",
-            "role",
             "language",
             "country",
         )
+        read_only_fields = ("role",)
 
     def create(self, validated_data):
         user_serializer = RegistrationUserSerializer(data=validated_data.pop("user"))
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
-        profile = Farm360UserProfile.objects.create(**validated_data, user=user)
+        role = Role.objects.get_or_create(name="User")
+        profile = Farm360UserProfile.objects.create(
+            **validated_data, user=user, role=role[0]
+        )
         profile.save()
         return profile
 
@@ -126,6 +132,7 @@ class UserProfileSerializer(ModelSerializer):
             )
             instance.user.save()
 
+        instance.phone_code = validated_data.get("phone_code", instance.phone_code)
         instance.phone_number = validated_data.get(
             "phone_number", instance.phone_number
         )

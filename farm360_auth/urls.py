@@ -10,18 +10,20 @@ from .views import (
     CountryView,
     PhoneCodeView,
     LanguageView,
-    UserProfileViewSet,
+    UserViewSet,
+    UserProfileView,
 )
 
 router = DefaultRouter()
 router.register("roles", RolesViewSet, basename="role")
-router.register("users", UserProfileViewSet, basename="users")
+router.register("users", UserViewSet, basename="users")
 
 urlpatterns = [
     path("signup/", RegistrationUserView.as_view(), name="api_signup"),
     path("login/", LoginUserView.as_view(), name="api_login"),
     path("logout/", LogoutUserView.as_view(), name="api_logout"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("users/profile/", UserProfileView.as_view(), name="users_profile"),
     path("countries/", CountryView.as_view(), name="countries"),
     path("phonecodes/", PhoneCodeView.as_view(), name="phone_codes"),
     path("languages/", LanguageView.as_view(), name="languages"),

@@ -133,14 +133,16 @@ class PhoneCodeView(ListAPIView):
 
 
 @extend_schema_view()
-class UserProfileViewSet(ModelViewSet):
+class UserProfileView(ListAPIView):
+    queryset = Farm360UserProfile.objects.all()
+    serializer_class = UserProfileListSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = UserPagination
+
+
+@extend_schema_view()
+class UserViewSet(ModelViewSet):
     queryset = Farm360UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserPagination
-
-    def get_serializer_class(self):
-        if self.request.method == "GET":
-            return UserProfileListSerializer
-
-        return super().get_serializer_class()
