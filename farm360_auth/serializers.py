@@ -1,13 +1,17 @@
-from rest_framework.serializers import ModelSerializer, Serializer
-from rest_framework.serializers import CharField, ImageField
+from rest_framework.serializers import (
+    CharField,
+    ImageField,
+    ModelSerializer,
+    Serializer,
+)
 
 from farm360_auth.models import (
+    Country,
     Farm360User,
     Farm360UserProfile,
-    Role,
-    Country,
     Language,
     PhoneCode,
+    Role,
 )
 
 

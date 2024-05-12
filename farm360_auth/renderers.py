@@ -2,8 +2,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.status import is_success
 
 
-class Farm360ResponeRenderer(JSONRenderer):
-
+class Farm360ResponseRenderer(JSONRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
         response = renderer_context["response"]
 

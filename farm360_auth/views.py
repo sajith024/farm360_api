@@ -146,3 +146,7 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserPagination
+    
+    def perform_destroy(self, instance):
+        instance.user.delete()
+        return super().perform_destroy(instance)
