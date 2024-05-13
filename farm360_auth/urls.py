@@ -12,6 +12,7 @@ from .views import (
     LanguageView,
     UserViewSet,
     UserProfileView,
+    DashboardStatsView,
 )
 
 router = DefaultRouter()
@@ -24,6 +25,7 @@ urlpatterns = [
     path("logout/", LogoutUserView.as_view(), name="api_logout"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("users/profile/", UserProfileView.as_view(), name="users_profile"),
+    path("dashboard/stats/", DashboardStatsView.as_view(), name="dashboard_stats"),
     path("countries/", CountryView.as_view(), name="countries"),
     path("phonecodes/", PhoneCodeView.as_view(), name="phone_codes"),
     path("languages/", LanguageView.as_view(), name="languages"),

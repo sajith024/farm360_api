@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 
 from django.db.models import Model
-from django.db.models import CharField, TextField, FileField, DateTimeField
+from django.db.models import CharField, TextField, FileField, ImageField, DateTimeField
 from django.db.models import ForeignKey, ManyToManyField, CASCADE
 
 
@@ -39,9 +39,10 @@ class CropSeed(Model):
 class Crop(Model):
     name = CharField(max_length=150)
     description = TextField(max_length=1000, blank=True, default="")
+    image = ImageField(upload_to="crop/image", default="", blank=True)
     user = ForeignKey(get_user_model(), on_delete=CASCADE, related_name="crops")
-    fertilizer = ManyToManyField(Fertilizer, related_name="crops")
-    crop_seed = ManyToManyField(CropSeed, related_name="crops")
+    fertilizers = ManyToManyField(Fertilizer, related_name="crops")
+    crop_seeds = ManyToManyField(CropSeed, related_name="crops")
     fertilizer_provider = ForeignKey(
         FertilizerProvider, on_delete=CASCADE, related_name="crops"
     )
@@ -86,3 +87,8 @@ class CropPestDisease(Model):
     insect_name = CharField(max_length=150)
     symptoms = TextField(max_length=500, blank=True, default="")
     pest_product = ManyToManyField(PestProduct, related_name="pest_diseases")
+    chemical_control = TextField(max_length=1000, blank=True, default="")
+    biological_control = TextField(max_length=1000, blank=True, default="")
+
+    def __str__(self) -> str:
+        return self.insect_name

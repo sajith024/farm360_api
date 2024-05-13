@@ -2,6 +2,7 @@ import logging
 
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.contrib.auth import authenticate
+from rest_framework.views import APIView
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
@@ -19,6 +20,7 @@ from rest_framework.status import (
 )
 
 from .models import Farm360User, Farm360UserProfile, Role, Country, Language, PhoneCode
+from farm360_crop_management.models import Crop
 from .serializers import (
     RegistrationUserSerializer,
     LoginUserSerializer,
@@ -146,7 +148,21 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserPagination
-    
+
     def perform_destroy(self, instance):
         instance.user.delete()
         return super().perform_destroy(instance)
+
+
+@extend_schema_view()
+class DashboardStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        users = Farm360UserProfile.objects.filter(role__name="User")
+        crops = Crop.objects.all()
+        data = {
+            "total_users": users.count(),
+            "total_crops": crops.count(),
+        }
+        return Response(data, status=HTTP_200_OK)
