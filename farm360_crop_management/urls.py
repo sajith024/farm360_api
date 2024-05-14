@@ -7,6 +7,7 @@ from .views import (
     PestProductViewSet,
     CropViewSet,
     CropImageView,
+    CropStagesView,
 )
 
 router = DefaultRouter()
@@ -17,5 +18,6 @@ router.register("crop", CropViewSet, basename="crop_crop")
 
 urlpatterns = [
     path("crops/crop/<int:pk>/image/", CropImageView.as_view(), name="crop_image"),
+    path("crops/crop/stages/", CropStagesView.as_view(), name="crop_stages"),
     path("crops/", include(router.urls)),
 ]

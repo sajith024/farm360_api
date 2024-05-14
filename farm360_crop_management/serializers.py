@@ -31,15 +31,10 @@ class PestProductSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class CropStageSerilalizer(ModelSerializer):
+class CropStageSerializer(ModelSerializer):
     class Meta:
         model = CropStage
-        fields = (
-            "id",
-            "stage",
-            "title",
-            "description",
-        )
+        fields = "__all__"
 
 
 class FertilizerProviderSerializer(ModelSerializer):
@@ -68,7 +63,6 @@ class CropPestDiseaseSerializer(ModelSerializer):
 
 
 class CropSerializer(ModelSerializer):
-    crop_stages = CropStageSerilalizer(many=True)
     fertilizer_provider = FertilizerProviderSerializer()
     crop_seed_provider = CropSeedProviderSerializer()
     pest_diseases = CropPestDiseaseSerializer(many=True)
@@ -79,7 +73,6 @@ class CropSerializer(ModelSerializer):
             "id",
             "name",
             "description",
-            "crop_stages",
             "fertilizers",
             "fertilizer_provider",
             "crop_seeds",
@@ -89,7 +82,6 @@ class CropSerializer(ModelSerializer):
 
     def create(self, validated_data):
         request = self.context["request"]
-        crop_stages_data = validated_data.pop("crop_stages")
         pest_diseases_data = validated_data.pop("pest_diseases")
         fertilizers = validated_data.pop("fertilizers")
         crop_seeds = validated_data.pop("crop_seeds")
@@ -114,9 +106,6 @@ class CropSerializer(ModelSerializer):
 
             for crop_seed in crop_seeds:
                 crop.crop_seeds.add(crop_seed)
-
-            for stage in crop_stages_data:
-                CropStage.objects.create(**stage, crop=crop)
 
             for pest_disease in pest_diseases_data:
                 pest_products = pest_disease.pop("pest_product")

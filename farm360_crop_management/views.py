@@ -3,18 +3,20 @@ import logging
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import UpdateAPIView, CreateAPIView
 from rest_framework.viewsets import ModelViewSet
 
 from .models import (
     Crop,
     CropSeed,
+    CropStage,
     Fertilizer,
     PestProduct,
 )
 from .serializers import (
     CropSerializer,
     CropImageSerializer,
+    CropStageSerializer,
     CropSeedSerializer,
     FertilizerSerializer,
     PestProductSerializer,
@@ -56,4 +58,11 @@ class CropViewSet(ModelViewSet):
 class CropImageView(UpdateAPIView):
     queryset = Crop.objects.all()
     serializer_class = CropImageSerializer
+    permission_classes = [IsAuthenticated]
+
+
+@extend_schema_view()
+class CropStagesView(CreateAPIView):
+    queryset = CropStage.objects.all()
+    serializer_class = CropStageSerializer
     permission_classes = [IsAuthenticated]
