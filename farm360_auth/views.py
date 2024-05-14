@@ -1,15 +1,9 @@
 import logging
 
-from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.contrib.auth import authenticate
-from rest_framework.views import APIView
-from rest_framework.generics import (
-    CreateAPIView,
-    ListAPIView,
-)
-from rest_framework.viewsets import ModelViewSet
-from rest_framework_simplejwt.views import TokenBlacklistView
-from rest_framework_simplejwt.tokens import RefreshToken
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -18,21 +12,25 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
 )
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenBlacklistView
 
-from .models import Farm360User, Farm360UserProfile, Role, Country, Language, PhoneCode
 from farm360_crop_management.models import Crop
+
+from .models import Country, Farm360User, Farm360UserProfile, Language, PhoneCode, Role
+from .pagination import UserPagination
 from .serializers import (
-    RegistrationUserSerializer,
-    LoginUserSerializer,
-    RoleSerializer,
     CountrySerializer,
     LanguageSerializer,
+    LoginUserSerializer,
     PhoneCodeSerializer,
-    UserProfileSerializer,
+    RegistrationUserSerializer,
+    RoleSerializer,
     UserProfileListSerializer,
+    UserProfileSerializer,
 )
-from .pagination import UserPagination
-
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +138,15 @@ class UserProfileView(ListAPIView):
     serializer_class = UserProfileListSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserPagination
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = [
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+        "language__name",
+        "country__name",
+    ]
+    ordering_fields = ["user__first_name", "email"]
 
 
 @extend_schema_view()

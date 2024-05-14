@@ -62,6 +62,18 @@ class CropPestDiseaseSerializer(ModelSerializer):
         )
 
 
+class CropListSerializer(ModelSerializer):
+    class Meta:
+        model = Crop
+        fields = (
+            "id",
+            "name",
+            "description",
+            "image",
+            "created_at",
+        )
+
+
 class CropSerializer(ModelSerializer):
     fertilizer_provider = FertilizerProviderSerializer()
     crop_seed_provider = CropSeedProviderSerializer()
@@ -115,6 +127,56 @@ class CropSerializer(ModelSerializer):
 
         return crop
 
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get("name", instance.name)
+        instance.description = validated_data.get("description", instance.description)
+
+        fertilizer_provider = validated_data.get("fertilizer_provider")
+        if fertilizer_provider:
+            instance.fertilizer_provider.delete()
+            fertilizer_prov = FertilizerProvider.objects.get_or_create(
+                **fertilizer_provider
+            )[0]
+            instance.fertilizer_provider = fertilizer_prov
+
+        crop_seed_provider = validated_data.get("crop_seed_provider")
+
+        if crop_seed_provider:
+            instance.crop_seed_provider.delete()
+            cropseed_prov = CropSeedProvider.objects.get_or_create(
+                **crop_seed_provider
+            )[0]
+            instance.crop_seed_provider = cropseed_prov
+
+        instance.save()
+
+        fertilizers = validated_data.get("fertilizers")
+        if fertilizers:
+            instance.fertilizers.clear()
+            for fertilizer in fertilizers:
+                instance.fertilizers.add(fertilizer)
+
+        crop_seeds = validated_data.get("crop_seeds")
+        if crop_seeds:
+            instance.crop_seeds.clear()
+            for crop_seed in crop_seeds:
+                instance.crop_seeds.add(crop_seed)
+
+        pest_diseases = validated_data.get("pest_diseases")
+        if pest_diseases:
+            for pest_disease in instance.pest_diseases.all():
+                pest_disease.delete()
+
+            for pest_disease in pest_diseases:
+                pest_products = pest_disease.pop("pest_product")
+                crop_pest = CropPestDisease.objects.create(
+                    **pest_disease, crop=instance
+                )
+                for product in pest_products:
+                    crop_pest.pest_product.add(product)
+
+        return instance
+
 
 class CropImageSerializer(ModelSerializer):
     class Meta:
@@ -125,3 +187,42 @@ class CropImageSerializer(ModelSerializer):
         instance.image = validated_data.get("image", instance.image)
         instance.save()
         return instance
+
+
+class CropPestDetailDiseaseSerializer(ModelSerializer):
+    pest_product = PestProductSerializer(many=True)
+
+    class Meta:
+        model = CropPestDisease
+        fields = (
+            "id",
+            "insect_name",
+            "symptoms",
+            "pest_product",
+            "chemical_control",
+            "biological_control",
+        )
+
+
+class CropDetailSerializer(ModelSerializer):
+    fertilizer_provider = FertilizerProviderSerializer()
+    crop_seed_provider = CropSeedProviderSerializer()
+    pest_diseases = CropPestDetailDiseaseSerializer(many=True)
+    crop_stages = CropStageSerializer(many=True)
+    fertilizers = FertilizerSerializer(many=True)
+    crop_seeds = CropSeedSerializer(many=True)
+
+    class Meta:
+        model = Crop
+        fields = (
+            "id",
+            "name",
+            "image",
+            "description",
+            "crop_stages",
+            "fertilizers",
+            "fertilizer_provider",
+            "crop_seeds",
+            "crop_seed_provider",
+            "pest_diseases",
+        )
