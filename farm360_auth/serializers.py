@@ -1,3 +1,6 @@
+import re
+
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import (
     CharField,
     ImageField,
@@ -20,17 +23,49 @@ class RoleSerializer(ModelSerializer):
         model = Role
         fields = "__all__"
 
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z ]{1,97}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
+            )
+        return value
+
+    def validate_code(self, value):
+        if not re.match(r"^\d{3}$", value):
+            raise ValidationError("Code must be 3 digits")
+        return value
+
+    def validate_flag(self, value):
+        max_size = 1024**2
+        if value.size > max_size:
+            raise ValidationError("Image size should not exceed 1MB.")
+        return value
+
 
 class CountrySerializer(ModelSerializer):
     class Meta:
         model = Country
         fields = "__all__"
 
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z ]{1,147}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
+            )
+        return value
+
 
 class LanguageSerializer(ModelSerializer):
     class Meta:
         model = Language
         fields = "__all__"
+
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z ]{1,97}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
+            )
+        return value
 
 
 class PhoneCodeSerializer(ModelSerializer):
@@ -44,6 +79,11 @@ class PhoneCodeSerializer(ModelSerializer):
             "code",
         )
 
+    def validate_code(self, value):
+        if not re.match(r"^\d{3}$", value):
+            raise ValidationError("Code must be 3 digits")
+        return value
+
 
 class RegistrationUserSerializer(ModelSerializer):
     class Meta:
@@ -54,6 +94,30 @@ class RegistrationUserSerializer(ModelSerializer):
             "last_name",
             "password",
         )
+
+    def validate_email(self, value):
+        if not re.match(r"^[\w\-\.]+@[\w-]+\.[^\d\s-]{2,4}$", value):
+            raise ValidationError("Code must be 3 digits")
+        return value
+
+    def validate_first_name(self, value):
+        if not re.match(r"^[A-Z][a-z]{,147}[^\s\d]$", value):
+            raise ValidationError("Enter valid name.")
+        return value
+
+    def validate_last_name(self, value):
+        if not re.match(r"^[A-Z][a-z]{,147}[^\s\d]$", value):
+            raise ValidationError("Enter valid name.")
+        return value
+
+    def validate_password(self, value):
+        if not re.match(
+            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$", value
+        ):
+            raise ValidationError(
+                "Minimum eight characters, at least one letter, one number and one special character"
+            )
+        return value
 
     def create(self, validated_data):
         user = Farm360User.objects.create(**validated_data)
@@ -112,15 +176,25 @@ class UserProfileSerializer(ModelSerializer):
             "language",
             "country",
         )
-        read_only_fields = ("role",)
+
+    def validate_image(self, value):
+        max_size = 5 * (1024**2)
+        if value.size > max_size:
+            raise ValidationError("Image size should not exceed 5MB.")
+        return value
+
+    def validate_phone_number(self, value):
+        if not re.match(r"^[6-9]\d{9}$", value):
+            raise ValidationError("Enter valid phone number")
+        return value
 
     def create(self, validated_data):
         user_serializer = RegistrationUserSerializer(data=validated_data.pop("user"))
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
-        role = Role.objects.get_or_create(name="User")
+        role = Role.objects.get_or_create(name="User")[0]
         profile = Farm360UserProfile.objects.create(
-            **validated_data, user=user, role=role[0]
+            **validated_data, user=user, role=role
         )
         profile.save()
         return profile

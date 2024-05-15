@@ -22,9 +22,9 @@ class FertilizerSerializer(ModelSerializer):
         fields = "__all__"
 
     def validate_name(self, value):
-        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,197}[a-zA-Z]$", value):
             raise ValidationError(
-                "Name must contain only alphabetic characters and start and end with space or hyphen."
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
             )
         return value
 
@@ -43,9 +43,9 @@ class CropSeedSerializer(ModelSerializer):
         fields = "__all__"
 
     def validate_name(self, value):
-        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,197}[a-zA-Z]$", value):
             raise ValidationError(
-                "Name must contain only alphabetic characters and start and end with space or hyphen."
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
             )
         return value
 
@@ -64,9 +64,9 @@ class PestProductSerializer(ModelSerializer):
         fields = "__all__"
 
     def validate_name(self, value):
-        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,147}[a-zA-Z]$", value):
             raise ValidationError(
-                "Name must contain only alphabetic characters and start and end with space or hyphen."
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
             )
         return value
 
@@ -87,14 +87,21 @@ class CropStageSerializer(ModelSerializer):
     def validate_title(self, value):
         if not re.match(r"^[a-zA-Z][a-zA-Z -]{10,197}[a-zA-Z]$", value):
             raise ValidationError(
-                "Name must contain only alphabetic characters and start and end with space or hyphen."
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
             )
         return value
 
     def validate_description(self, value):
-        if not re.match(r"^[a-zA-Z0-9.,!?;:()\'\"\s]{50,1000}$", value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9.,!?\-;:()\'\"\s]{10,999}$", value):
             raise ValidationError("Description contains invalid characters.")
 
+        return value
+
+    def validate_video(self, value):
+        max_size = 20 * (1024**2)
+
+        if value.size > max_size:
+            raise ValidationError("Image size should not exceed 20MB.")
         return value
 
 
@@ -104,14 +111,14 @@ class FertilizerProviderSerializer(ModelSerializer):
         fields = "__all__"
 
     def validate_name(self, value):
-        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,147}[a-zA-Z]$", value):
             raise ValidationError(
-                "Name must contain only alphabetic characters and start and end with space or hyphen."
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
             )
         return value
 
     def validate_phone_number(self, value):
-        if not re.match(r"^\d{6,15}$", value):
+        if not re.match(r"^\d{6,14}$", value):
             raise ValidationError("Invalid contact number format.")
 
         return value
@@ -125,7 +132,7 @@ class CropSeedProviderSerializer(ModelSerializer):
     def validate_name(self, value):
         if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
             raise ValidationError(
-                "Name must contain only alphabetic characters and start and end with space or hyphen."
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
             )
         return value
 
@@ -147,6 +154,37 @@ class CropPestDiseaseSerializer(ModelSerializer):
             "chemical_control",
             "biological_control",
         )
+
+    def validate_insect_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,147}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
+            )
+        return value
+
+    def validate_symptoms(self, value):
+        if not re.match(r"^[a-zA-Z][[a-zA-Z0-9.,!?;:()\-\'\"\s]{10,499}$", value):
+            raise ValidationError(
+                "Symptoms contains invalid characters, should be 50 - 500 characters."
+            )
+
+        return value
+
+    def validate_chemical_control(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9.,!?\-;:()\'\"\s]{10,999}$", value):
+            raise ValidationError(
+                "Chemical Control contains invalid characters, should be 50 - 1000 characters."
+            )
+
+        return value
+
+    def validate_biological_control(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9.,!?\-;:()\'\"\s]{10,999}$", value):
+            raise ValidationError(
+                "Biological Control contains invalid characters, should be 50 - 1000 characters."
+            )
+
+        return value
 
 
 class CropListSerializer(ModelSerializer):
@@ -178,6 +216,19 @@ class CropSerializer(ModelSerializer):
             "crop_seed_provider",
             "pest_diseases",
         )
+
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,147}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain space, hyphen, only alphabetic characters by start and end."
+            )
+        return value
+
+    def validate_description(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9.,!?\-;:()\'\"\s]{10,999}$", value):
+            raise ValidationError("Description contains invalid characters.")
+
+        return value
 
     def create(self, validated_data):
         request = self.context["request"]
@@ -269,6 +320,12 @@ class CropImageSerializer(ModelSerializer):
     class Meta:
         model = Crop
         fields = ("image",)
+
+    def validate_image(self, value):
+        max_size = 5 * (1024**2)
+        if value.size > max_size:
+            raise ValidationError("Image size should not exceed 5MB.")
+        return value
 
     def update(self, instance, validated_data):
         instance.image = validated_data.get("image", instance.image)
