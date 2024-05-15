@@ -2,7 +2,7 @@ import logging
 
 from django.contrib.auth import authenticate
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -17,6 +17,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenBlacklistView
 
+from farm360_auth.filters import UserOrderFilter
 from farm360_crop_management.models import Crop
 
 from .models import Country, Farm360User, Farm360UserProfile, Language, PhoneCode, Role
@@ -138,7 +139,7 @@ class UserProfileView(ListAPIView):
     serializer_class = UserProfileListSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserPagination
-    filter_backends = [SearchFilter, OrderingFilter]
+    filter_backends = [SearchFilter, UserOrderFilter]
     search_fields = [
         "user__email",
         "user__first_name",
@@ -146,7 +147,6 @@ class UserProfileView(ListAPIView):
         "language__name",
         "country__name",
     ]
-    ordering_fields = ["user__first_name", "email"]
 
 
 @extend_schema_view()

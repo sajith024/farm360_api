@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Model
-from django.db.models import CharField, EmailField, ImageField
+from django.db.models import CharField, EmailField, ImageField, DateTimeField
 from django.db.models import OneToOneField, ForeignKey, CASCADE
 
 from .manager import MyUserManager
@@ -61,6 +61,8 @@ class Farm360UserProfile(Model):
     role = ForeignKey(Role, on_delete=CASCADE, related_name="users")
     language = ForeignKey(Language, on_delete=CASCADE, related_name="users")
     country = ForeignKey(Country, on_delete=CASCADE, related_name="users")
+    created_at = DateTimeField(auto_now_add=True)
+    updated_at = DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return f"Profile {self.user.email}"

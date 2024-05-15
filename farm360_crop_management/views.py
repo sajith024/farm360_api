@@ -1,7 +1,7 @@
 import logging
 
 from drf_spectacular.utils import extend_schema, extend_schema_view
-
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
     UpdateAPIView,
@@ -68,6 +68,9 @@ class CropListView(ListAPIView):
     serializer_class = CropListSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserPagination
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ["name", "created_at"]
+    ordering_fields = ["name", "created_at"]
 
 
 @extend_schema_view()

@@ -1,4 +1,7 @@
+import re
+
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer
 
 from .models import (
@@ -18,11 +21,41 @@ class FertilizerSerializer(ModelSerializer):
         model = Fertilizer
         fields = "__all__"
 
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain only alphabetic characters and start and end with space or hyphen."
+            )
+        return value
+
+    def validate(self, data):
+        name = data.get("name")
+        if name:
+            existing_instance = Fertilizer.objects.filter(name=name).first()
+            if existing_instance:
+                raise ValidationError("This name already exists.")
+        return data
+
 
 class CropSeedSerializer(ModelSerializer):
     class Meta:
         model = CropSeed
         fields = "__all__"
+
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain only alphabetic characters and start and end with space or hyphen."
+            )
+        return value
+
+    def validate(self, data):
+        name = data.get("name")
+        if name:
+            existing_instance = CropSeed.objects.filter(name=name).first()
+            if existing_instance:
+                raise ValidationError("This name already exists.")
+        return data
 
 
 class PestProductSerializer(ModelSerializer):
@@ -30,11 +63,39 @@ class PestProductSerializer(ModelSerializer):
         model = PestProduct
         fields = "__all__"
 
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain only alphabetic characters and start and end with space or hyphen."
+            )
+        return value
+
+    def validate(self, data):
+        name = data.get("name")
+        if name:
+            existing_instance = PestProduct.objects.filter(name=name).first()
+            if existing_instance:
+                raise ValidationError("This name already exists.")
+        return data
+
 
 class CropStageSerializer(ModelSerializer):
     class Meta:
         model = CropStage
         fields = "__all__"
+
+    def validate_title(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{10,197}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain only alphabetic characters and start and end with space or hyphen."
+            )
+        return value
+
+    def validate_description(self, value):
+        if not re.match(r"^[a-zA-Z0-9.,!?;:()\'\"\s]{50,1000}$", value):
+            raise ValidationError("Description contains invalid characters.")
+
+        return value
 
 
 class FertilizerProviderSerializer(ModelSerializer):
@@ -42,11 +103,37 @@ class FertilizerProviderSerializer(ModelSerializer):
         model = FertilizerProvider
         fields = "__all__"
 
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain only alphabetic characters and start and end with space or hyphen."
+            )
+        return value
+
+    def validate_phone_number(self, value):
+        if not re.match(r"^\d{6,15}$", value):
+            raise ValidationError("Invalid contact number format.")
+
+        return value
+
 
 class CropSeedProviderSerializer(ModelSerializer):
     class Meta:
         model = CropSeedProvider
         fields = "__all__"
+
+    def validate_name(self, value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z -]{1,97}[a-zA-Z]$", value):
+            raise ValidationError(
+                "Name must contain only alphabetic characters and start and end with space or hyphen."
+            )
+        return value
+
+    def validate_phone_number(self, value):
+        if not re.match(r"^\d{6,15}$", value):
+            raise ValidationError("Invalid contact number format.")
+
+        return value
 
 
 class CropPestDiseaseSerializer(ModelSerializer):
