@@ -163,7 +163,7 @@ class CropPestDiseaseSerializer(ModelSerializer):
         return value
 
     def validate_symptoms(self, value):
-        if not re.match(r"^[a-zA-Z][[a-zA-Z0-9.,!?;:()\-\'\"\s]{10,499}$", value):
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9.,!?;:()\-\'\"\s]{10,499}$", value):
             raise ValidationError(
                 "Symptoms contains invalid characters, should be 50 - 500 characters."
             )

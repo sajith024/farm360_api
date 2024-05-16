@@ -32,6 +32,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("farm360_auth.urls")),
     path("api/", include("farm360_crop_management.urls")),
+    path("api/", include("farm36_community_management.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

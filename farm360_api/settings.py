@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "farm360_auth",
     "farm360_crop_management",
+    "farm36_community_management",
 ]
 
 MIDDLEWARE = [
