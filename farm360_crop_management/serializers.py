@@ -171,7 +171,9 @@ class CropPestDiseaseSerializer(ModelSerializer):
         return value
 
     def validate_chemical_control(self, value):
-        if not re.match(r"^[a-zA-Z][a-zA-Z0-9.,!?\-;:()\'\"\s]{10,999}$", value):
+        if value and not re.match(
+            r"^[a-zA-Z][a-zA-Z0-9.,!?\-;:()\'\"\s]{10,999}$", value
+        ):
             raise ValidationError(
                 "Chemical Control contains invalid characters, should be 50 - 1000 characters."
             )
@@ -179,7 +181,9 @@ class CropPestDiseaseSerializer(ModelSerializer):
         return value
 
     def validate_biological_control(self, value):
-        if not re.match(r"^[a-zA-Z][a-zA-Z0-9.,!?\-;:()\'\"\s]{10,999}$", value):
+        if value and not re.match(
+            r"^[a-zA-Z][a-zA-Z0-9.,!?\-;:()\'\"\s]{10,999}$", value
+        ):
             raise ValidationError(
                 "Biological Control contains invalid characters, should be 50 - 1000 characters."
             )
@@ -271,16 +275,13 @@ class CropSerializer(ModelSerializer):
 
         fertilizer_provider = validated_data.get("fertilizer_provider")
         if fertilizer_provider:
-            instance.fertilizer_provider.delete()
             fertilizer_prov = FertilizerProvider.objects.get_or_create(
                 **fertilizer_provider
             )[0]
             instance.fertilizer_provider = fertilizer_prov
 
         crop_seed_provider = validated_data.get("crop_seed_provider")
-
         if crop_seed_provider:
-            instance.crop_seed_provider.delete()
             cropseed_prov = CropSeedProvider.objects.get_or_create(
                 **crop_seed_provider
             )[0]

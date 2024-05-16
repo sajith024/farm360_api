@@ -184,7 +184,7 @@ class UserProfileSerializer(ModelSerializer):
         return value
 
     def validate_phone_number(self, value):
-        if not re.match(r"^[6-9]\d{9}$", value):
+        if not re.match(r"^\d{6,15}$", value):
             raise ValidationError("Enter valid phone number")
         return value
 
