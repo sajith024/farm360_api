@@ -13,7 +13,7 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
 )
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenBlacklistView
 
@@ -134,7 +134,7 @@ class PhoneCodeView(ListAPIView):
 
 
 @extend_schema_view()
-class UserProfileView(ListAPIView):
+class UserProfileViewSet(ReadOnlyModelViewSet):
     queryset = Farm360UserProfile.objects.all()
     serializer_class = UserProfileListSerializer
     permission_classes = [IsAuthenticated]

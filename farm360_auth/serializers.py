@@ -3,6 +3,7 @@ import re
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import (
     CharField,
+    IntegerField,
     ImageField,
     ModelSerializer,
     Serializer,
@@ -134,6 +135,7 @@ class RegistrationUserSerializer(ModelSerializer):
 
 
 class UserProfileListSerializer(ModelSerializer):
+    user_id = IntegerField(source="user.id")
     email = CharField(source="user.email")
     first_name = CharField(source="user.first_name")
     last_name = CharField(source="user.last_name")
@@ -145,6 +147,7 @@ class UserProfileListSerializer(ModelSerializer):
         model = Farm360UserProfile
         fields = (
             "id",
+            "user_id",
             "email",
             "first_name",
             "last_name",

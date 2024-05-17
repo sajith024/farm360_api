@@ -3,8 +3,8 @@ import logging
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import ListAPIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from farm360_auth.pagination import UserPagination
 
@@ -19,7 +19,7 @@ from .models import (
 
 from .serializers import (
     CommunityQueryDetailSerializer,
-    CommunityQueryCommentDetailSerializer,
+    CommunityCommentDetailSerializer,
     CommunityQuerySerializer,
     CommunityCommentSerializer,
 )
@@ -27,7 +27,7 @@ from .serializers import (
 
 # Create your views here.
 @extend_schema_view()
-class CommunityQueryDetailList(ListAPIView):
+class CommunityQueryDetailViewSet(ReadOnlyModelViewSet):
     queryset = CommunityQuery.objects.all()
     serializer_class = CommunityQueryDetailSerializer
     permission_classes = [IsAuthenticated]
@@ -35,17 +35,17 @@ class CommunityQueryDetailList(ListAPIView):
 
 
 @extend_schema_view()
-class CommunityCommentDetailList(ListAPIView):
+class CommunityCommentDetailViewset(ReadOnlyModelViewSet):
     queryset = CommunityComment.objects.all()
-    serializer_class = CommunityQueryCommentDetailSerializer
+    serializer_class = CommunityCommentDetailSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         query_id = self.request.query_params.get("query")
         if query_id:
-            return self.queryset.filter(query_id=query_id, main=None)
+            return self.queryset.filter(query_id=query_id, main__isnull=True)
 
-        return self.queryset.filter(main=None)
+        return self.queryset.filter(main__isnull=True)
 
 
 @extend_schema_view()

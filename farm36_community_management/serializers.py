@@ -1,14 +1,20 @@
 import re
 
+from django.contrib.auth import get_user_model
+from django.db.models import Q
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import CharField, SerializerMethodField, ImageField
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import (
+    CharField,
+    ImageField,
+    ModelSerializer,
+    SerializerMethodField,
+)
 
 from .models import (
-    CommunityQuery,
-    CommunityQueryImage,
     CommunityComment,
     CommunityCommentImage,
+    CommunityQuery,
+    CommunityQueryImage,
 )
 
 
@@ -46,11 +52,25 @@ class CommunityCommentSerializer(ModelSerializer):
         )
 
 
+class CommunityCreatedUserDetail(ModelSerializer):
+    image = ImageField(source="profile.image")
+    country = CharField(source="profile.country.name")
+    role = CharField(source="profile.role.name")
+
+    class Meta:
+        model = get_user_model()
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "image",
+            "country",
+            "role",
+        )
+
+
 class CommunityQueryDetailSerializer(ModelSerializer):
-    first_name = CharField(source="created_by.first_name")
-    last_name = CharField(source="created_by.last_name")
-    profile_image = ImageField(source="created_by.profile.image")
-    country = CharField(source="created_by.profile.country.name")
+    created_by = CommunityCreatedUserDetail()
     images = SerializerMethodField()
     replies = SerializerMethodField()
 
@@ -62,30 +82,26 @@ class CommunityQueryDetailSerializer(ModelSerializer):
             "description",
             "query_type",
             "created_at",
-            "first_name",
-            "last_name",
-            "profile_image",
-            "country",
+            "created_by",
             "images",
             "replies",
         )
 
     def get_images(self, obj):
-        community_images = obj.images.all()
         request = self.context.get("request")
-        images = [
+        return [
             request.build_absolute_uri(community_image.image.url)
-            for community_image in community_images
+            for community_image in obj.images.all()
         ]
-        return images
 
     def get_replies(self, obj):
-        return obj.comments.count()
+        return obj.comments.filter(
+            ~Q(created_by__profile__role__name="Admin") & Q(main__isnull=True)
+        ).count()
 
 
-class CommunityQueryCommentDetailSerializer(ModelSerializer):
-    first_name = CharField(source="created_by.first_name")
-    last_name = CharField(source="created_by.last_name")
+class CommunityCommentDetailSerializer(ModelSerializer):
+    created_by = CommunityCreatedUserDetail()
     threads = SerializerMethodField()
     images = SerializerMethodField()
 
@@ -96,21 +112,21 @@ class CommunityQueryCommentDetailSerializer(ModelSerializer):
             "description",
             "images",
             "created_at",
-            "first_name",
-            "last_name",
+            "created_by",
             "threads",
         )
 
     def get_threads(self, obj):
-        threads = obj.threads.all()
-        serializer = CommunityQueryCommentDetailSerializer(instance=threads, many=True)
+        serializer = CommunityCommentDetailSerializer(
+            instance=obj.threads.all(),
+            many=True,
+            context=self.context,
+        )
         return serializer.data
 
     def get_images(self, obj):
-        comment_images = obj.images.all()
         request = self.context.get("request")
-        images = [
+        return [
             request.build_absolute_uri(comment_image.image.url)
-            for comment_image in comment_images
+            for comment_image in obj.images.all()
         ]
-        return images
